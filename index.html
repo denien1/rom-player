@@ -3,82 +3,99 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Play & Upload Your ROMs (NES + GBA)</title>
+  <title>Play & Upload Your ROMs (NES + GBA, with Diagnostics)</title>
   <!-- NES core -->
   <script src="https://unpkg.com/jsnes/dist/jsnes.min.js"></script>
   <style>
-    :root{--bg:#0d1020;--card:#171a2c;--text:#e9ecf1;--muted:#9aa3b2;--accent:#7aa2ff}
+    :root{--bg:#0d1020;--card:#171a2c;--text:#e9ecf1;--muted:#9aa3b2;--accent:#7aa2ff;--warn:#ffcc66;--err:#ff8b8b;--ok:#7cff9e}
     *{box-sizing:border-box}
-    body{margin:0;background:linear-gradient(180deg,#0d1020,#0b0e1a);color:var(--text);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
+    body{margin:0;background:linear-gradient(180deg,#0d1020,#0b0e1a);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
     header,footer{text-align:center;padding:16px}
     h1{margin:0 0 6px}
-    .wrap{max-width:1000px;margin:0 auto;padding:16px}
+    .wrap{max-width:1050px;margin:0 auto;padding:16px}
+    .row{display:grid;grid-template-columns:1fr 360px;gap:14px}
+    @media (max-width: 980px){.row{grid-template-columns:1fr}}
     .card{background:var(--card);border:1px solid #22263c;border-radius:14px;padding:16px}
-    #screen{display:block;margin:0 auto;background:#000;border:1px solid #444;border-radius:10px;width:100%;max-width:640px;image-rendering:pixelated}
-    #drop{border:2px dashed #3a3f66;border-radius:10px;margin:12px auto;padding:12px;text-align:center;color:var(--muted);max-width:640px}
+    #screen{display:block;margin:0 auto;background:#000;border:1px solid #444;border-radius:10px;width:100%;max-width:672px;image-rendering:pixelated}
+    #drop{border:2px dashed #3a3f66;border-radius:10px;margin:12px auto;padding:12px;text-align:center;color:var(--muted);max-width:672px}
     #drop.drag{background:#131735;border-color:#596199}
     .controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px}
     .controls button,.controls label,.controls select{background:#1d2240;color:var(--text);border:1px solid #2a315a;border-radius:12px;padding:8px 12px;font-weight:600}
+    .controls input[type="file"]{display:none}
     .hint{color:var(--muted);text-align:center}
     .kbd{display:inline-block;padding:2px 6px;border:1px solid #2f365f;border-radius:6px;background:#141936;font-family:ui-monospace,Menlo,Consolas,monospace}
     details summary{cursor:pointer}
-    .ok{color:#7cff9e}.bad{color:#ff8b8b}
+    .ok{color:var(--ok)}.bad{color:var(--err)}.warn{color:var(--warn)}
+    #errorBox{border:1px solid #4a1e28;background:#23141a}
+    #errorLog{max-height:220px;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;background:#0f1329;padding:8px;border-radius:8px}
+    .stack{white-space:pre-wrap}
   </style>
 </head>
 <body>
   <header>
     <h1>Play & Upload Your ROMs</h1>
-    <p>NES works out of the box. <strong>GBA</strong> is supported by dynamically loading a browser core (e.g. <code>gba.js</code>).</p>
+    <p>NES works out of the box. <strong>GBA</strong> works after loading a browser core (e.g. <code>gba.js</code>) and (if required) a BIOS. Everything runs locally.</p>
   </header>
 
   <div class="wrap">
-    <div class="card">
-      <canvas id="screen" width="256" height="240" aria-label="Game screen"></canvas>
-      <div class="controls">
-        <select id="systemSelect" aria-label="Console">
-          <option value="nes" selected>NES (.nes)</option>
-          <option value="gba">GBA (.gba)</option>
-        </select>
-        <input type="file" id="romInput" accept=".nes,.gba" hidden />
-        <label for="romInput">Choose ROM</label>
-        <button id="pauseBtn">Pause</button>
-        <button id="resetBtn">Reset</button>
-        <button id="fullBtn">Fullscreen</button>
+    <div class="row">
+      <div class="card">
+        <canvas id="screen" width="256" height="240" aria-label="Game screen"></canvas>
+        <div class="controls">
+          <select id="systemSelect" aria-label="Console">
+            <option value="nes" selected>NES (.nes)</option>
+            <option value="gba">GBA (.gba)</option>
+          </select>
+          <input type="file" id="romInput" accept=".nes,.gba" />
+          <label for="romInput">Choose ROM</label>
+          <button id="pauseBtn">Pause</button>
+          <button id="resetBtn">Reset</button>
+          <button id="fullBtn">Fullscreen</button>
+        </div>
+        <div id="drop">Drag & drop a <strong>.nes</strong> or <strong>.gba</strong> file here</div>
+        <p class="hint">Keyboard (NES): <span class="kbd">Arrows</span> = D‑Pad, <span class="kbd">Z</span>=A, <span class="kbd">X</span>=B, <span class="kbd">Enter</span>=Start, <span class="kbd">Shift</span>=Select</p>
+        <p id="uploadStatus" class="hint" aria-live="polite"></p>
       </div>
-      <div id="drop">Drag & drop a <strong>.nes</strong> or <strong>.gba</strong> file here</div>
-      <p class="hint">Keyboard (NES): <span class="kbd">Arrows</span> = D‑Pad, <span class="kbd">Z</span>=A, <span class="kbd">X</span>=B, <span class="kbd">Enter</span>=Start, <span class="kbd">Shift</span>=Select</p>
-      <p id="uploadStatus" class="hint" aria-live="polite"></p>
+
+      <aside class="card" id="errorBox">
+        <h3 style="margin:0 0 6px">Errors & Logs</h3>
+        <p class="hint" style="margin:6px 0">If nothing shows on screen, check here for details.</p>
+        <pre id="errorLog"></pre>
+      </aside>
     </div>
 
     <details id="diagnostics" class="card" style="margin-top:12px">
       <summary>Diagnostics & helpers</summary>
-      <p class="hint">Paste a GBA core URL to enable GBA support. Recommended for testing:
-        <code>https://cdn.jsdelivr.net/gh/endrift/gbajs@master/js/gba.min.js</code>
-      </p>
-      <div style="display:flex; gap:8px; align-items:center">
+      <p class="hint">1) Paste a GBA core URL to enable GBA (e.g. <code>https://cdn.jsdelivr.net/gh/endrift/gbajs@master/js/gba.min.js</code>). 2) If your core needs a BIOS, load it from a local file to avoid CORS issues.</p>
+
+      <div style="display:flex; gap:8px; align-items:center; margin-top:8px">
         <input id="coreUrl" type="url" placeholder="https://cdn.jsdelivr.net/gh/endrift/gbajs@master/js/gba.min.js" style="flex:1;padding:8px;border-radius:8px;border:1px solid #2a315a;background:#0f1329;color:#e9ecf1" />
         <button id="loadGbaBtn">Load GBA core</button>
+        <button id="testCoreBtn" title="Calls minimal API to verify presence">Test core</button>
       </div>
-      <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-        <input id="biosUrl" type="url" placeholder="(Optional) BIOS URL — some cores require it" style="flex:1;padding:8px;border-radius:8px;border:1px solid #2a315a;background:#0f1329;color:#e9ecf1" />
-        <button id="loadBiosBtn">Load BIOS</button>
+
+      <div style="display:flex; gap:8px; align-items:center; margin-top:12px; flex-wrap:wrap">
+        <input id="biosFile" type="file" accept=".bin,.rom,.gba" />
+        <label for="biosFile" class="hint" style="flex:1">Load BIOS from <strong>local file</strong> (recommended)</label>
+        <button id="clearBiosBtn" title="Forget the in-memory BIOS">Clear BIOS</button>
       </div>
+
       <ul id="diagList" class="hint" style="margin-top:10px"></ul>
     </details>
   </div>
 
   <footer>
-    Built with <a href="https://github.com/bfirsh/jsnes" target="_blank" rel="noopener noreferrer">JSNES</a> and pluggable GBA cores. Only use ROMs you own.
+    Built with <a href="https://github.com/bfirsh/jsnes" target="_blank" rel="noopener noreferrer">JSNES</a> and a pluggable GBA core. Only use ROMs you own.
   </footer>
 
 <script>
 (function(){
+  // ---------- Canvas & NES ----------
   const canvas = document.getElementById('screen');
   const ctx = canvas.getContext('2d');
   const imageData = ctx.createImageData(256,240);
   const frameBuffer = new Uint32Array(imageData.data.buffer);
 
-  // NES
   const nes = new jsnes.NES({
     onFrame(frame){
       if (frame instanceof Uint8Array){
@@ -88,7 +105,7 @@
     },
   });
 
-  // State
+  // ---------- State ----------
   let running=false, rafId=null, currentFile=null, system='nes';
 
   function loop(){ if(!running) return; stepFrame(); rafId=requestAnimationFrame(loop); }
@@ -97,56 +114,61 @@
   function reset(){ if(system==='nes') nes.reset(); else if(window.GBACore) window.GBACore.reset(); }
   function stepFrame(){ if(system==='nes') nes.frame(); else if(window.GBACore) window.GBACore.frame(); }
 
-  // Status helpers
-  function setStatus(msg){ const el=document.getElementById('uploadStatus'); if(el) el.textContent=msg; }
+  // ---------- Status & Errors ----------
+  const statusEl = document.getElementById('uploadStatus');
+  const errorLog = document.getElementById('errorLog');
+  function setStatus(msg){ if(statusEl) statusEl.textContent = msg; }
+  function logError(label, err){ const line = `[${new Date().toLocaleTimeString()}] ${label}: ${err?.message||err}`; errorLog.textContent += line + "\n"; if(err?.stack){ errorLog.textContent += String(err.stack).slice(0,2000) + "\n"; } console.error(label, err); }
   function openDiagnosticsAndFocus(){ const d=document.getElementById('diagnostics'); const u=document.getElementById('coreUrl'); if(d && !d.open) d.open=true; u?.focus(); d?.scrollIntoView({behavior:'smooth',block:'start'}); }
 
-  // GBA adapter for gba.js (endrift/gbajs)
+  // ---------- GBA adapter for gba.js ----------
   function installGBACoreAdapter(){
-    if (window.GBACore) return true;
+    if (window.GBACore) return true; // already present
     if (window.GameBoyAdvance){
       let gba = new window.GameBoyAdvance();
       try{ if(gba.setCanvas) gba.setCanvas(canvas); }catch{}
-      function applyBios(){ if(window.__gbaBiosBytes && gba.setBios){ try{ gba.setBios(window.__gbaBiosBytes); }catch{} } }
+      function applyBios(){ if(window.__gbaBiosBytes && gba.setBios){ try{ gba.setBios(window.__gbaBiosBytes); }catch(e){logError('BIOS apply',e);} } }
       window.GBACore = {
         loadROM(arrayBuffer){
-          if (gba.setBios && !window.__gbaBiosBytes){ setStatus('GBA BIOS required. Paste a BIOS URL in Diagnostics → Load BIOS.'); openDiagnosticsAndFocus(); return; }
+          if (gba.setBios && !window.__gbaBiosBytes){ setStatus('GBA BIOS required. Load BIOS (Diagnostics).'); openDiagnosticsAndFocus(); return; }
           gba = new window.GameBoyAdvance();
           try{ if(gba.setCanvas) gba.setCanvas(canvas); }catch{}
           applyBios();
           const buf = arrayBuffer instanceof ArrayBuffer ? new Uint8Array(arrayBuffer) : new Uint8Array(arrayBuffer.buffer||arrayBuffer);
-          if (typeof gba.loadRom === 'function') { try{ gba.loadRom(buf); }catch(e){ console.error('gba.loadRom failed',e);} }
-          else if (typeof gba.loadRomFromBuffer === 'function') { try{ gba.loadRomFromBuffer(buf); }catch(e){ console.error('loadRomFromBuffer failed',e);} }
-          else { setStatus('Loaded GBA core, but no compatible ROM load method.'); return; }
-          try{ if (typeof gba.runStable==='function') gba.runStable(); }catch(e){ console.warn('GBA start error',e); }
+          if (typeof gba.loadRom === 'function') {
+            try{ gba.loadRom(buf); }catch(e){ logError('gba.loadRom failed', e); return; }
+          } else if (typeof gba.loadRomFromBuffer === 'function') {
+            try{ gba.loadRomFromBuffer(buf); }catch(e){ logError('loadRomFromBuffer failed', e); return; }
+          } else {
+            setStatus('Loaded GBA core, but no compatible ROM load method.'); return;
+          }
+          try{ if (typeof gba.runStable==='function') gba.runStable(); }catch(e){ logError('GBA start', e); }
           window.__GBA_INSTANCE__ = gba;
+          setStatus('GBA ROM running.');
         },
-        frame(){ const g=window.__GBA_INSTANCE__||gba; if(!g) return; if (typeof g.step==='function') { try{ g.step(); }catch{} } else if (typeof g.runFrame==='function') { try{ g.runFrame(); }catch{} } },
-        button(code,pressed){ const g=window.__GBA_INSTANCE__||gba; if(!g||!g.keypad) return; const kp=g.keypad; const map={up:kp.UP,down:kp.DOWN,left:kp.LEFT,right:kp.RIGHT,a:kp.A,b:kp.B,start:kp.START,select:kp.SELECT,l:kp.L,r:kp.R}; const key=map[code]; if(key==null) return; try{ if(pressed&&kp.press) kp.press(key); else if(!pressed&&kp.release) kp.release(key); else if(pressed&&kp.pressKey) kp.pressKey(key); else if(!pressed&&kp.releaseKey) kp.releaseKey(key);}catch{} },
-        reset(){ try{ (window.__GBA_INSTANCE__||gba).reset(); }catch{} }
+        frame(){ const g=window.__GBA_INSTANCE__||gba; if(!g) return; try{ if (typeof g.step==='function') g.step(); else if (typeof g.runFrame==='function') g.runFrame(); }catch(e){ logError('GBA frame', e); } },
+        button(code,pressed){ const g=window.__GBA_INSTANCE__||gba; if(!g||!g.keypad) return; const kp=g.keypad; const map={up:kp.UP,down:kp.DOWN,left:kp.LEFT,right:kp.RIGHT,a:kp.A,b:kp.B,start:kp.START,select:kp.SELECT,l:kp.L,r:kp.R}; const key=map[code]; if(key==null) return; try{ if(pressed&&kp.press) kp.press(key); else if(!pressed&&kp.release) kp.release(key); else if(pressed&&kp.pressKey) kp.pressKey(key); else if(!pressed&&kp.releaseKey) kp.releaseKey(key);}catch(e){ logError('GBA button', e); } },
+        reset(){ try{ (window.__GBA_INSTANCE__||gba).reset(); setStatus('GBA reset.'); }catch(e){ logError('GBA reset', e); } }
       };
       return true;
     }
     return false;
   }
 
-  // File loading
-  function loadNESRom(file){ const r=new FileReader(); r.onload=()=>{ nes.loadROM(r.result); start(); }; r.readAsBinaryString(file); }
+  // ---------- File loading ----------
+  function loadNESRom(file){ const r=new FileReader(); r.onload=()=>{ nes.loadROM(r.result); start(); setStatus('NES ROM running.'); }; r.readAsBinaryString(file); }
   async function loadGBARom(file){
-    if (!window.GBACore && !installGBACoreAdapter()){
-      setStatus('Loading GBA core...');
-      try{
-        await loadScript('https://cdn.jsdelivr.net/gh/endrift/gbajs@master/js/gba.min.js');
-        if (!installGBACoreAdapter()) throw new Error('Adapter not installed');
-        setStatus('GBA core loaded. If required, load BIOS, then drop the .gba again.');
+    try{
+      if (!window.GBACore && !installGBACoreAdapter()){
+        setStatus('No GBA core detected. Use Diagnostics to load one.');
         openDiagnosticsAndFocus();
         return;
-      }catch(e){ setStatus('Failed to load GBA core: '+e.message); return; }
-    }
-    const r=new FileReader(); r.onload=()=>{ window.GBACore.loadROM(r.result); start(); }; r.readAsArrayBuffer(file);
+      }
+      const r=new FileReader(); r.onload=()=>{ window.GBACore.loadROM(r.result); start(); }; r.readAsArrayBuffer(file);
+    }catch(e){ logError('loadGBARom', e); }
   }
 
-  // Drag & drop
+  // ---------- UI: DnD ----------
   const drop=document.getElementById('drop');
   ;['dragenter','dragover'].forEach(evt=>drop.addEventListener(evt,e=>{e.preventDefault();e.dataTransfer.dropEffect='copy';drop.classList.add('drag');}));
   ;['dragleave','dragend','drop'].forEach(evt=>drop.addEventListener(evt,e=>{e.preventDefault();drop.classList.remove('drag');}));
@@ -158,7 +180,7 @@
     else setStatus('Unsupported file type');
   });
 
-  // Buttons & inputs
+  // ---------- UI: buttons ----------
   const romInput=document.getElementById('romInput');
   const pauseBtn=document.getElementById('pauseBtn');
   const resetBtn=document.getElementById('resetBtn');
@@ -173,34 +195,48 @@
 
   function updateButtons(){ pauseBtn.textContent = running? 'Pause':'Resume'; }
 
-  // Keyboard (NES defaults; adapter handles GBA if present)
+  // ---------- Keyboard ----------
   const KEYMAP={13:['start',true],16:['select',true],37:['left'],38:['up'],39:['right'],40:['down'],90:['a'],88:['b']};
   window.addEventListener('keydown',e=>{ const m=KEYMAP[e.keyCode]; if(m){ e.preventDefault(); if(system==='nes'){ const BTN=jsnes.Controller; const B={up:BTN.BUTTON_UP,down:BTN.BUTTON_DOWN,left:BTN.BUTTON_LEFT,right:BTN.BUTTON_RIGHT,a:BTN.BUTTON_A,b:BTN.BUTTON_B,start:BTN.BUTTON_START,select:BTN.BUTTON_SELECT}; const b=B[m[0]]; if(b!=null) nes.buttonDown(1,b);} else if(window.GBACore){ window.GBACore.button(m[0],true);} }});
   window.addEventListener('keyup',e=>{ const m=KEYMAP[e.keyCode]; if(m){ e.preventDefault(); if(system==='nes'){ const BTN=jsnes.Controller; const B={up:BTN.BUTTON_UP,down:BTN.BUTTON_DOWN,left:BTN.BUTTON_LEFT,right:BTN.BUTTON_RIGHT,a:BTN.BUTTON_A,b:BTN.BUTTON_B,start:BTN.BUTTON_START,select:BTN.BUTTON_SELECT}; const b=B[m[0]]; if(b!=null) nes.buttonUp(1,b);} else if(window.GBACore){ window.GBACore.button(m[0],false);} }});
 
-  // Diagnostics & helpers
+  // ---------- Diagnostics ----------
   const coreUrl=document.getElementById('coreUrl');
   const loadGbaBtn=document.getElementById('loadGbaBtn');
-  const biosUrl=document.getElementById('biosUrl');
-  const loadBiosBtn=document.getElementById('loadBiosBtn');
+  const testCoreBtn=document.getElementById('testCoreBtn');
+  const biosFile=document.getElementById('biosFile');
+  const clearBiosBtn=document.getElementById('clearBiosBtn');
   const diagList=document.getElementById('diagList');
 
-  const loadScript=(src)=>new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.async=true; s.onload=res; s.onerror=()=>rej(new Error('Failed to load '+src)); document.head.appendChild(s); });
+  function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.async=true; s.onload=res; s.onerror=()=>rej(new Error('Failed to load '+src)); document.head.appendChild(s); }); }
 
   loadGbaBtn?.addEventListener('click', async ()=>{
     const url=(coreUrl?.value||'').trim(); if(!url){ setStatus('Enter a valid GBA core URL.'); openDiagnosticsAndFocus(); return; }
     try{ setStatus('Loading GBA core...'); await loadScript(url); if(!installGBACoreAdapter()) throw new Error('Adapter not installed'); setStatus('GBA core loaded. If required, load BIOS, then drop a .gba.'); }
-    catch(e){ setStatus('Failed to load GBA core: '+e.message); }
+    catch(e){ setStatus('Failed to load GBA core: '+e.message); logError('Load GBA core', e); }
   });
 
-  loadBiosBtn?.addEventListener('click', async ()=>{
-    const url=(biosUrl?.value||'').trim(); if(!url){ setStatus('Enter a BIOS URL first.'); openDiagnosticsAndFocus(); return; }
-    try{ setStatus('Fetching BIOS...'); const resp=await fetch(url,{cache:'no-store'}); if(!resp.ok) throw new Error('HTTP '+resp.status); const buf=await resp.arrayBuffer(); window.__gbaBiosBytes=new Uint8Array(buf); setStatus('BIOS loaded. Drop a .gba to start.'); }
-    catch(e){ setStatus('Failed to load BIOS: '+e.message); }
+  testCoreBtn?.addEventListener('click', ()=>{
+    try{
+      const ok = !!(window.GameBoyAdvance || window.GBACore);
+      setStatus(ok ? 'GBA core is present.' : 'No GBA core detected.');
+      if (!ok) openDiagnosticsAndFocus();
+    }catch(e){ logError('Test core', e); }
   });
+
+  biosFile?.addEventListener('change', async (e)=>{
+    try{
+      const f = e.target.files && e.target.files[0]; if(!f) return;
+      const buf = await f.arrayBuffer();
+      window.__gbaBiosBytes = new Uint8Array(buf);
+      setStatus('BIOS loaded from local file.');
+    }catch(e){ logError('Load BIOS file', e); setStatus('Failed to load BIOS file.'); }
+  });
+
+  clearBiosBtn?.addEventListener('click', ()=>{ window.__gbaBiosBytes = null; setStatus('BIOS cleared.'); });
 
   // Self-tests
-  (function selfTests(){ const results=[]; const ok=n=>results.push(['✔',n]); const bad=(n,e)=>results.push(['✖',n+' — '+e]); try{ if(document.getElementById('uploadStatus')) ok('#uploadStatus present'); else throw 'missing'; }catch(e){ bad('#uploadStatus present',e);} try{ if(window.jsnes&&nes) ok('JSNES loaded'); else throw 'jsnes missing'; }catch(e){ bad('JSNES loaded',e);} try{ ['systemSelect','romInput','pauseBtn','resetBtn','fullBtn','drop'].forEach(id=>{ if(!document.getElementById(id)) throw id+' missing';}); ok('Controls present'); }catch(e){ bad('Controls present',e);} try{ if(!window.GBACore) ok('GBA core absent (expected until loaded)'); else ok('GBA core detected'); }catch(e){ bad('GBA core presence check',e);} if(diagList){ diagList.innerHTML=''; for(const r of results){ const li=document.createElement('li'); li.textContent=r[0]+' '+r[1]; diagList.appendChild(li);} } console.table(results); })();
+  (function selfTests(){ const results=[]; const ok=(n)=>results.push(['✔',n]); const bad=(n,e)=>results.push(['✖',n+' — '+e]); try{ if(document.getElementById('uploadStatus')) ok('#uploadStatus present'); else throw 'missing'; }catch(e){ bad('#uploadStatus present',e);} try{ if(window.jsnes&&nes) ok('JSNES loaded'); else throw 'jsnes missing'; }catch(e){ bad('JSNES loaded',e);} try{ ['systemSelect','romInput','pauseBtn','resetBtn','fullBtn','drop'].forEach(id=>{ if(!document.getElementById(id)) throw id+' missing';}); ok('Controls present'); }catch(e){ bad('Controls present',e);} try{ if(!window.GBACore) ok('GBA core absent (expected until loaded)'); else ok('GBA core detected'); }catch(e){ bad('GBA core presence check',e);} if(diagList){ diagList.innerHTML=''; for(const r of results){ const li=document.createElement('li'); li.textContent=r[0]+' '+r[1]; diagList.appendChild(li);} } console.table(results); })();
 
   // Init
   setStatus('Ready. Load a .nes file, or load a GBA core then drop a .gba.');
