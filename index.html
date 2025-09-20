@@ -1,300 +1,284 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Play Your Own ROMs (Local-Only + Optional Uploads)</title>
+  <style>
+    :root{--bg:#0f1220;--card:#171a2c;--text:#e9ecf1;--muted:#9aa3b2;--accent:#7aa2ff}
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#0d1020,#0b0e1a);color:var(--text);font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"}
+    header{padding:24px 16px;text-align:center}
+    header h1{margin:0 0 6px;font-size:28px}
+    header p{margin:0;color:var(--muted)}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+    @media (max-width: 980px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid #22263c;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .pad{padding:16px}
+    #screen{width:100%;image-rendering:pixelated;background:#000;border-radius:12px;border:1px solid #262a40;display:block}
+    .controls{display:flex;flex-wrap:wrap;gap:8px}
+    .controls button,.controls label, .controls select{background:#1d2240;color:var(--text);border:1px solid #2a315a;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:600}
+    .controls select{cursor:auto}
+    .controls button[disabled]{opacity:.45;cursor:not-allowed}
+    .hint{color:var(--muted);font-size:13px}
+    .kbd{display:inline-block;padding:2px 6px;border:1px solid #2f365f;border-radius:6px;background:#141936;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .drop{border:1px dashed #334; border-radius:12px;padding:12px;text-align:center;color:var(--muted)}
+    .drop.dragover{background:#141936;border-color:#556}
+    .touch{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+    .touch button{padding:12px}
+    footer{opacity:.8;text-align:center;padding:24px}
+    a{color:var(--accent)}
+    details summary{cursor:pointer}
+    .ok{color:#7cff9e}
+    .bad{color:#ff7a7a}
   </style>
+  <!-- JSNES from unpkg CDN -->
+  <script src="https://unpkg.com/jsnes/dist/jsnes.min.js"></script>
 </head>
 <body>
-<p class="p1">&lt;!doctype html&gt;</p>
-<p class="p1">&lt;html lang="en"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="utf-8" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Play Your Own ROMs (Local-Only + Optional Uploads)&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>:root{--bg:#0f1220;--card:#171a2c;--text:#e9ecf1;--muted:#9aa3b2;--accent:#7aa2ff}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>*{box-sizing:border-box}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>body{margin:0;background:linear-gradient(180deg,#0d1020,#0b0e1a);color:var(--text);font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>header{padding:24px 16px;text-align:center}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>header h1{margin:0 0 6px;font-size:28px}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>header p{margin:0;color:var(--muted)}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.wrap{max-width:1100px;margin:0 auto;padding:16px}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.grid{display:grid;grid-template-columns:1fr 360px;gap:16px}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>@media (max-width: 980px){.grid{grid-template-columns:1fr}}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.card{background:var(--card);border:1px solid #22263c;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.35)}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.pad{padding:16px}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>#screen{width:100%;image-rendering:pixelated;background:#000;border-radius:12px;border:1px solid #262a40;display:block}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.controls{display:flex;flex-wrap:wrap;gap:8px}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.controls button,.controls label, .controls select{background:#1d2240;color:var(--text);border:1px solid #2a315a;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:600}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.controls select{cursor:auto}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.controls button[disabled]{opacity:.45;cursor:not-allowed}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.hint{color:var(--muted);font-size:13px}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.kbd{display:inline-block;padding:2px 6px;border:1px solid #2f365f;border-radius:6px;background:#141936;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.drop{border:1px dashed #334; border-radius:12px;padding:12px;text-align:center;color:var(--muted)}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.drop.dragover{background:#141936;border-color:#556}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.touch{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.touch button{padding:12px}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>footer{opacity:.8;text-align:center;padding:24px}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>a{color:var(--accent)}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>details summary{cursor:pointer}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.ok{color:#7cff9e}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.bad{color:#ff7a7a}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- JSNES from unpkg CDN --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://unpkg.com/jsnes/dist/jsnes.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;header&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h1&gt;Play &amp; Upload Your ROMs&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;p&gt;Multi‑system (Nintendo): NES ready. SNES &amp; GBA hooks included — add a core to enable. &lt;strong&gt;Only use ROMs you own.&lt;/strong&gt;&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/header&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="wrap"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="grid"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card pad"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;canvas id="screen" width="256" height="240" aria-label="Game screen"&gt;&lt;/canvas&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="controls" style="margin-top:12px;gap:12px"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;div style="display:flex;gap:8px;align-items:center"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;label style="opacity:.8"&gt;System&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;select id="systemSelect" aria-label="Console"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;option value="nes" selected&gt;NES (.nes)&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;option value="snes"&gt;SNES (.sfc/.smc)&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;option value="gba"&gt;GBA (.gba)&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/select&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;input type="file" id="romInput" accept=".nes,.sfc,.smc,.gba" hidden /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;label for="romInput"&gt;Choose ROM&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;button id="uploadBtn" disabled&gt;Upload to server&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;button id="pauseBtn" disabled&gt;Pause&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;button id="resetBtn" disabled&gt;Reset&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;button id="fullBtn" disabled&gt;Fullscreen&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="drop" class="drop" style="margin-top:12px"&gt;Drag &amp; drop &lt;strong&gt;.nes&lt;/strong&gt;, &lt;strong&gt;.sfc/.smc&lt;/strong&gt;, or &lt;strong&gt;.gba&lt;/strong&gt; here&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;p class="hint" style="margin-top:10px"&gt;Keyboard: &lt;span class="kbd"&gt;Arrows&lt;/span&gt; = D‑Pad, &lt;span class="kbd"&gt;Z&lt;/span&gt;=A, &lt;span class="kbd"&gt;X&lt;/span&gt;=B, &lt;span class="kbd"&gt;Enter&lt;/span&gt;=Start, &lt;span class="kbd"&gt;Shift&lt;/span&gt;=Select.&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- FIX: provide a status element so script can update it safely --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;p id="uploadStatus" class="hint" aria-live="polite"&gt;&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;aside class="card pad"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;h3 style="margin-top:0"&gt;Legal &amp; Privacy&lt;/h3&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;p&gt;Only play or upload ROMs you &lt;em&gt;own the rights to&lt;/em&gt; (homebrew or public‑domain). If you enable uploads, store them on your own private server and protect with authentication.&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;h3&gt;Tips&lt;/h3&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;ul&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;li&gt;Use &lt;em&gt;Pause&lt;/em&gt; when switching tabs to save CPU.&lt;/li&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;li&gt;Fullscreen for bigger pixels; use browser zoom to scale.&lt;/li&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;li&gt;Mobile: add on‑screen buttons (hook available).&lt;/li&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/ul&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;details id="diagnostics" class="hint"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;summary&gt;Diagnostics &amp; self‑tests&lt;/summary&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;ul id="diagList" class="hint" style="margin:8px 0 0 0; padding-left:18px"&gt;&lt;/ul&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/details&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/aside&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;footer&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>Built with &lt;a href="https://github.com/bfirsh/jsnes" target="_blank" rel="noopener noreferrer"&gt;JSNES&lt;/a&gt;. SNES/GBA are pluggable via separate browser cores.</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/footer&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;script&gt;</p>
-<p class="p1">// --- Optional cores ---</p>
-<p class="p1">// SNES: include one of your preferred cores before this script and expose a small API on window.SNESCore:</p>
-<p class="p1">// <span class="Apple-converted-space">  </span>window.SNESCore = { loadROM(arrayBuffer, drawCb), frame(drawCb), button(code, pressed), reset() }</p>
-<p class="p1">// GBA: do the same for window.GBACore</p>
-<p class="p2"><br></p>
-<p class="p1">(function(){</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const canvas = document.getElementById('screen');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const ctx = canvas.getContext('2d');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const imageData = ctx.createImageData(256, 240);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const frameBuffer = new Uint32Array(imageData.data.buffer);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// NES (ready out of the box)</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const nes = new jsnes.NES({</p>
-<p class="p1"><span class="Apple-converted-space">    </span>onFrame: function(frame){</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (frame instanceof Uint8Array) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let j = 0; for (let i = 0; i &lt; frame.length; i += 3) { frameBuffer[j++] = (255 &lt;&lt; 24) | (frame[i+2] &lt;&lt; 16) | (frame[i+1] &lt;&lt; 8) | frame[i]; }</p>
-<p class="p1"><span class="Apple-converted-space">      </span>} else if (frame instanceof Uint32Array) { frameBuffer.set(frame); }</p>
-<p class="p1"><span class="Apple-converted-space">      </span>ctx.putImageData(imageData, 0, 0);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>},</p>
-<p class="p1"><span class="Apple-converted-space">  </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>const cores = {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>nes: {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>name: 'NES', ext: ['nes'],</p>
-<p class="p1"><span class="Apple-converted-space">      </span>load(binary){ nes.loadROM(binary); },</p>
-<p class="p1"><span class="Apple-converted-space">      </span>frame(){ nes.frame(); },</p>
-<p class="p1"><span class="Apple-converted-space">      </span>reset(){ nes.reset(); },</p>
-<p class="p1"><span class="Apple-converted-space">      </span>buttonDown(p){ nes.buttonDown(1,p); },</p>
-<p class="p1"><span class="Apple-converted-space">      </span>buttonUp(p){ nes.buttonUp(1,p); },</p>
-<p class="p1"><span class="Apple-converted-space">      </span>map: jsnes.Controller</p>
-<p class="p1"><span class="Apple-converted-space">    </span>},</p>
-<p class="p1"><span class="Apple-converted-space">    </span>snes: { name: 'SNES', ext: ['sfc','smc'], missing: ()=&gt;!window.SNESCore },</p>
-<p class="p1"><span class="Apple-converted-space">    </span>gba:<span class="Apple-converted-space">  </span>{ name: 'GBA',<span class="Apple-converted-space">  </span>ext: ['gba'],<span class="Apple-converted-space">      </span>missing: ()=&gt;!window.GBACore }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>let system = 'nes';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>let running = false; let rafId = null; let currentFile = null;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>function loop(){ if (!running) return; stepFrame(); rafId = requestAnimationFrame(loop); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>function start(){ if(!running){ running = true; loop(); updateButtons(); } }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>function stop(){ running = false; if (rafId) cancelAnimationFrame(rafId); updateButtons(); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>function reset(){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (system==='nes') cores.nes.reset();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>else if (system==='snes' &amp;&amp; window.SNESCore) window.SNESCore.reset();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>else if (system==='gba' &amp;&amp; window.GBACore) window.GBACore.reset();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>function stepFrame(){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (system==='nes') { cores.nes.frame(); }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>else if (system==='snes' &amp;&amp; window.SNESCore) { window.SNESCore.frame(drawToCanvas); }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>else if (system==='gba' &amp;&amp; window.GBACore) { window.GBACore.frame(drawToCanvas); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>function drawToCanvas(rgba){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (rgba &amp;&amp; rgba.length === imageData.data.length) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>imageData.data.set(rgba); ctx.putImageData(imageData,0,0);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>function setButton(code, pressed){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const BTN = jsnes.Controller; // NES map</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const BUTTONS = { up:BTN.BUTTON_UP, down:BTN.BUTTON_DOWN, left:BTN.BUTTON_LEFT, right:BTN.BUTTON_RIGHT, a:BTN.BUTTON_A, b:BTN.BUTTON_B, start:BTN.BUTTON_START, select:BTN.BUTTON_SELECT };</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (system==='nes') {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const b = BUTTONS[code]; if (b===undefined) return; pressed? nes.buttonDown(1,b) : nes.buttonUp(1,b);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>} else if (system==='snes' &amp;&amp; window.SNESCore) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>window.SNESCore.button(code, pressed);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>} else if (system==='gba' &amp;&amp; window.GBACore) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>window.GBACore.button(code, pressed);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>async function loadROMFromFile(file){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>currentFile = file;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const ext = file.name.split('.').pop().toLowerCase();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (cores.snes.ext.includes(ext)) system = 'snes';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>else if (cores.gba.ext.includes(ext)) system = 'gba';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>else system = 'nes';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>systemSelect.value = system;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (system!== 'nes' &amp;&amp; cores[system].missing &amp;&amp; cores[system].missing()){</p>
-<p class="p1"><span class="Apple-converted-space">      </span>setStatus(system.toUpperCase()+" core not loaded. Add the core script as noted in the comments.");</p>
-<p class="p1"><span class="Apple-converted-space">      </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>const reader = new FileReader();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (system==='nes'){</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (reader.readAsBinaryString) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>reader.onload = () =&gt; { nes.loadROM(reader.result); start(); updateButtons(); setStatus(''); };</p>
-<p class="p1"><span class="Apple-converted-space">        </span>reader.readAsBinaryString(file);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>reader.onload = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>const bytes = new Uint8Array(reader.result); let binary=''; const chunk=0x8000;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>for (let i=0;i&lt;bytes.length;i+=chunk) binary += String.fromCharCode.apply(null, bytes.subarray(i,i+chunk));</p>
-<p class="p1"><span class="Apple-converted-space">          </span>nes.loadROM(binary); start(); updateButtons(); setStatus('');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p1"><span class="Apple-converted-space">        </span>reader.readAsArrayBuffer(file);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>reader.onload = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const buf = reader.result;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (system==='snes') window.SNESCore.loadROM(buf, drawToCanvas);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (system==='gba') window.GBACore.loadROM(buf, drawToCanvas);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>start(); updateButtons(); setStatus('');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>};</p>
-<p class="p1"><span class="Apple-converted-space">      </span>reader.readAsArrayBuffer(file);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>function setStatus(msg){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const el = document.getElementById('uploadStatus');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (el) el.textContent = msg;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>else console.warn('[status]', msg);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// UI wiring</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const systemSelect = document.getElementById('systemSelect');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const romInput = document.getElementById('romInput');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const uploadBtn = document.getElementById('uploadBtn');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const pauseBtn = document.getElementById('pauseBtn');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const resetBtn = document.getElementById('resetBtn');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const fullBtn = document.getElementById('fullBtn');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const drop = document.getElementById('drop');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const uploadStatus = document.getElementById('uploadStatus');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>systemSelect.addEventListener('change', (e)=&gt;{ system = e.target.value; });</p>
-<p class="p1"><span class="Apple-converted-space">  </span>romInput.addEventListener('change', (e)=&gt;{ const f = e.target.files &amp;&amp; e.target.files[0]; if (f) loadROMFromFile(f); });</p>
-<p class="p1"><span class="Apple-converted-space">  </span>pauseBtn.addEventListener('click', ()=&gt; running ? stop() : start());</p>
-<p class="p1"><span class="Apple-converted-space">  </span>resetBtn.addEventListener('click', reset);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>fullBtn.addEventListener('click', ()=&gt;{ const el = canvas; if (el.requestFullscreen) el.requestFullscreen(); });</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>uploadBtn.addEventListener('click', async ()=&gt;{</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (!currentFile) { setStatus('Load a ROM first'); return; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (!confirm('By uploading you confirm you own the rights to this ROM. Continue?')) return;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>setStatus('Uploading...');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const form = new FormData(); form.append('rom', currentFile, currentFile.name);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const resp = await fetch('/upload', { method: 'POST', body: form, headers: { 'X-User-Id': 'user123' } });</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (!resp.ok) throw new Error(await resp.text());</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const data = await resp.json(); setStatus('Upload successful: ' + (data.filename || data.path || 'ok'));</p>
-<p class="p1"><span class="Apple-converted-space">    </span>} catch (err) { setStatus('Upload failed: ' + err.message); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>function updateButtons(){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>pauseBtn.disabled = false; pauseBtn.textContent = running ? 'Pause' : 'Resume';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>resetBtn.disabled = false; fullBtn.disabled = false; uploadBtn.disabled = !currentFile;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// Drag &amp; drop</p>
-<p class="p1"><span class="Apple-converted-space">  </span>;['dragenter','dragover'].forEach(evt=&gt;drop.addEventListener(evt, e=&gt;{e.preventDefault();e.stopPropagation();drop.classList.add('dragover');}));</p>
-<p class="p1"><span class="Apple-converted-space">  </span>;['dragleave','dragend','drop'].forEach(evt=&gt;drop.addEventListener(evt, e=&gt;{e.preventDefault();e.stopPropagation();drop.classList.remove('dragover');}));</p>
-<p class="p1"><span class="Apple-converted-space">  </span>drop.addEventListener('drop', (e)=&gt;{ const f = e.dataTransfer.files &amp;&amp; e.dataTransfer.files[0]; if (f) loadROMFromFile(f); });</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// Keyboard (NES defaults; SNES/GBA cores should interpret via .button handler)</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const KEYMAP = { 13: ['start', true], 16: ['select', true], 37: ['left'], 38: ['up'], 39: ['right'], 40: ['down'], 90: ['a'], 88: ['b'] };</p>
-<p class="p1"><span class="Apple-converted-space">  </span>window.addEventListener('keydown', (e)=&gt;{ const m = KEYMAP[e.keyCode]; if(m){ e.preventDefault(); setButton(m[0], true);} });</p>
-<p class="p1"><span class="Apple-converted-space">  </span>window.addEventListener('keyup', <span class="Apple-converted-space">  </span>(e)=&gt;{ const m = KEYMAP[e.keyCode]; if(m){ e.preventDefault(); setButton(m[0], false);} });</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// ---- Self-tests ("test cases") ----</p>
-<p class="p1"><span class="Apple-converted-space">  </span>(function runSelfTests(){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const results = [];</p>
-<p class="p1"><span class="Apple-converted-space">    </span>function ok(name){ results.push({name, ok:true}); }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>function bad(name, err){ results.push({name, ok:false, err:String(err)}); }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>try { if (uploadStatus) ok('#uploadStatus present'); else throw new Error('missing'); } catch(e){ bad('#uploadStatus present', e); }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>try { if (window.jsnes &amp;&amp; nes) ok('JSNES loaded'); else throw new Error('jsnes unavailable'); } catch(e){ bad('JSNES loaded', e); }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>['systemSelect','romInput','uploadBtn','pauseBtn','resetBtn','fullBtn','drop'].forEach(id=&gt;{ if(!document.getElementById(id)) throw new Error(id+' missing'); });</p>
-<p class="p1"><span class="Apple-converted-space">      </span>ok('Core controls exist');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>} catch(e){ bad('Core controls exist', e); }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>try { if (document.getElementById('systemSelect').value==='nes') ok('Default system is NES'); else throw new Error('default not NES'); } catch(e){ bad('Default system is NES', e); }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>try { if (!window.SNESCore) ok('SNES core absent (expected until user adds one)'); else ok('SNES core detected'); } catch(e){ bad('SNES core presence check', e); }</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>try { if (!window.GBACore) ok('GBA core absent (expected until you load one)'); else ok('GBA core detected'); } catch(e){ bad('GBA core presence check', e); }</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>const ul = document.getElementById('diagList');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (ul) {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>ul.innerHTML = '';</p>
-<p class="p1"><span class="Apple-converted-space">      </span>for (const r of results){</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const li = document.createElement('li');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>li.innerHTML = (r.ok? '&lt;span class="ok"&gt;✔&lt;/span&gt; ' : '&lt;span class="bad"&gt;✖&lt;/span&gt; ') + r.name + (r.ok? '' : ' — ' + r.err);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>ul.appendChild(li);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>console.table(results);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>})();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>// Initial state</p>
-<p class="p1"><span class="Apple-converted-space">  </span>updateButtons();</p>
-<p class="p1">})();</p>
-<p class="p1">&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+  <header>
+    <h1>Play & Upload Your ROMs</h1>
+    <p>Multi‑system (Nintendo): NES ready. SNES & GBA hooks included — add a core to enable. <strong>Only use ROMs you own.</strong></p>
+  </header>
+
+  <div class="wrap">
+    <div class="grid">
+      <div class="card pad">
+        <canvas id="screen" width="256" height="240" aria-label="Game screen"></canvas>
+        <div class="controls" style="margin-top:12px;gap:12px">
+          <div style="display:flex;gap:8px;align-items:center">
+            <label style="opacity:.8">System</label>
+            <select id="systemSelect" aria-label="Console">
+              <option value="nes" selected>NES (.nes)</option>
+              <option value="snes">SNES (.sfc/.smc)</option>
+              <option value="gba">GBA (.gba)</option>
+            </select>
+          </div>
+          <input type="file" id="romInput" accept=".nes,.sfc,.smc,.gba" hidden />
+          <label for="romInput">Choose ROM</label>
+          <button id="uploadBtn" disabled>Upload to server</button>
+          <button id="pauseBtn" disabled>Pause</button>
+          <button id="resetBtn" disabled>Reset</button>
+          <button id="fullBtn" disabled>Fullscreen</button>
+        </div>
+        <div id="drop" class="drop" style="margin-top:12px">Drag & drop <strong>.nes</strong>, <strong>.sfc/.smc</strong>, or <strong>.gba</strong> here</div>
+        <p class="hint" style="margin-top:10px">Keyboard: <span class="kbd">Arrows</span> = D‑Pad, <span class="kbd">Z</span>=A, <span class="kbd">X</span>=B, <span class="kbd">Enter</span>=Start, <span class="kbd">Shift</span>=Select.</p>
+        <!-- FIX: provide a status element so script can update it safely -->
+        <p id="uploadStatus" class="hint" aria-live="polite"></p>
+      </div>
+
+      <aside class="card pad">
+        <h3 style="margin-top:0">Legal & Privacy</h3>
+        <p>Only play or upload ROMs you <em>own the rights to</em> (homebrew or public‑domain). If you enable uploads, store them on your own private server and protect with authentication.</p>
+        <h3>Tips</h3>
+        <ul>
+          <li>Use <em>Pause</em> when switching tabs to save CPU.</li>
+          <li>Fullscreen for bigger pixels; use browser zoom to scale.</li>
+          <li>Mobile: add on‑screen buttons (hook available).</li>
+        </ul>
+
+        <details id="diagnostics" class="hint">
+          <summary>Diagnostics & self‑tests</summary>
+          <ul id="diagList" class="hint" style="margin:8px 0 0 0; padding-left:18px"></ul>
+        </details>
+      </aside>
+    </div>
+  </div>
+
+  <footer>
+    Built with <a href="https://github.com/bfirsh/jsnes" target="_blank" rel="noopener noreferrer">JSNES</a>. SNES/GBA are pluggable via separate browser cores.
+  </footer>
+
+<script>
+// --- Optional cores ---
+// SNES: include one of your preferred cores before this script and expose a small API on window.SNESCore:
+//   window.SNESCore = { loadROM(arrayBuffer, drawCb), frame(drawCb), button(code, pressed), reset() }
+// GBA: do the same for window.GBACore
+
+(function(){
+  const canvas = document.getElementById('screen');
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.createImageData(256, 240);
+  const frameBuffer = new Uint32Array(imageData.data.buffer);
+
+  // NES (ready out of the box)
+  const nes = new jsnes.NES({
+    onFrame: function(frame){
+      if (frame instanceof Uint8Array) {
+        let j = 0; for (let i = 0; i < frame.length; i += 3) { frameBuffer[j++] = (255 << 24) | (frame[i+2] << 16) | (frame[i+1] << 8) | frame[i]; }
+      } else if (frame instanceof Uint32Array) { frameBuffer.set(frame); }
+      ctx.putImageData(imageData, 0, 0);
+    },
+  });
+
+  const cores = {
+    nes: {
+      name: 'NES', ext: ['nes'],
+      load(binary){ nes.loadROM(binary); },
+      frame(){ nes.frame(); },
+      reset(){ nes.reset(); },
+      buttonDown(p){ nes.buttonDown(1,p); },
+      buttonUp(p){ nes.buttonUp(1,p); },
+      map: jsnes.Controller
+    },
+    snes: { name: 'SNES', ext: ['sfc','smc'], missing: ()=>!window.SNESCore },
+    gba:  { name: 'GBA',  ext: ['gba'],      missing: ()=>!window.GBACore }
+  };
+
+  let system = 'nes';
+  let running = false; let rafId = null; let currentFile = null;
+
+  function loop(){ if (!running) return; stepFrame(); rafId = requestAnimationFrame(loop); }
+  function start(){ if(!running){ running = true; loop(); updateButtons(); } }
+  function stop(){ running = false; if (rafId) cancelAnimationFrame(rafId); updateButtons(); }
+  function reset(){
+    if (system==='nes') cores.nes.reset();
+    else if (system==='snes' && window.SNESCore) window.SNESCore.reset();
+    else if (system==='gba' && window.GBACore) window.GBACore.reset();
+  }
+
+  function stepFrame(){
+    if (system==='nes') { cores.nes.frame(); }
+    else if (system==='snes' && window.SNESCore) { window.SNESCore.frame(drawToCanvas); }
+    else if (system==='gba' && window.GBACore) { window.GBACore.frame(drawToCanvas); }
+  }
+
+  function drawToCanvas(rgba){
+    if (rgba && rgba.length === imageData.data.length) {
+      imageData.data.set(rgba); ctx.putImageData(imageData,0,0);
+    }
+  }
+
+  function setButton(code, pressed){
+    const BTN = jsnes.Controller; // NES map
+    const BUTTONS = { up:BTN.BUTTON_UP, down:BTN.BUTTON_DOWN, left:BTN.BUTTON_LEFT, right:BTN.BUTTON_RIGHT, a:BTN.BUTTON_A, b:BTN.BUTTON_B, start:BTN.BUTTON_START, select:BTN.BUTTON_SELECT };
+    if (system==='nes') {
+      const b = BUTTONS[code]; if (b===undefined) return; pressed? nes.buttonDown(1,b) : nes.buttonUp(1,b);
+    } else if (system==='snes' && window.SNESCore) {
+      window.SNESCore.button(code, pressed);
+    } else if (system==='gba' && window.GBACore) {
+      window.GBACore.button(code, pressed);
+    }
+  }
+
+  async function loadROMFromFile(file){
+    currentFile = file;
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (cores.snes.ext.includes(ext)) system = 'snes';
+    else if (cores.gba.ext.includes(ext)) system = 'gba';
+    else system = 'nes';
+    systemSelect.value = system;
+
+    if (system!== 'nes' && cores[system].missing && cores[system].missing()){
+      setStatus(system.toUpperCase()+" core not loaded. Add the core script as noted in the comments.");
+      return;
+    }
+
+    const reader = new FileReader();
+    if (system==='nes'){
+      if (reader.readAsBinaryString) {
+        reader.onload = () => { nes.loadROM(reader.result); start(); updateButtons(); setStatus(''); };
+        reader.readAsBinaryString(file);
+      } else {
+        reader.onload = () => {
+          const bytes = new Uint8Array(reader.result); let binary=''; const chunk=0x8000;
+          for (let i=0;i<bytes.length;i+=chunk) binary += String.fromCharCode.apply(null, bytes.subarray(i,i+chunk));
+          nes.loadROM(binary); start(); updateButtons(); setStatus('');
+        };
+        reader.readAsArrayBuffer(file);
+      }
+    } else {
+      reader.onload = () => {
+        const buf = reader.result;
+        if (system==='snes') window.SNESCore.loadROM(buf, drawToCanvas);
+        if (system==='gba') window.GBACore.loadROM(buf, drawToCanvas);
+        start(); updateButtons(); setStatus('');
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  }
+
+  function setStatus(msg){
+    const el = document.getElementById('uploadStatus');
+    if (el) el.textContent = msg;
+    else console.warn('[status]', msg);
+  }
+
+  // UI wiring
+  const systemSelect = document.getElementById('systemSelect');
+  const romInput = document.getElementById('romInput');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const fullBtn = document.getElementById('fullBtn');
+  const drop = document.getElementById('drop');
+  const uploadStatus = document.getElementById('uploadStatus');
+
+  systemSelect.addEventListener('change', (e)=>{ system = e.target.value; });
+  romInput.addEventListener('change', (e)=>{ const f = e.target.files && e.target.files[0]; if (f) loadROMFromFile(f); });
+  pauseBtn.addEventListener('click', ()=> running ? stop() : start());
+  resetBtn.addEventListener('click', reset);
+  fullBtn.addEventListener('click', ()=>{ const el = canvas; if (el.requestFullscreen) el.requestFullscreen(); });
+
+  uploadBtn.addEventListener('click', async ()=>{
+    if (!currentFile) { setStatus('Load a ROM first'); return; }
+    if (!confirm('By uploading you confirm you own the rights to this ROM. Continue?')) return;
+    setStatus('Uploading...');
+    try {
+      const form = new FormData(); form.append('rom', currentFile, currentFile.name);
+      const resp = await fetch('/upload', { method: 'POST', body: form, headers: { 'X-User-Id': 'user123' } });
+      if (!resp.ok) throw new Error(await resp.text());
+      const data = await resp.json(); setStatus('Upload successful: ' + (data.filename || data.path || 'ok'));
+    } catch (err) { setStatus('Upload failed: ' + err.message); }
+  });
+
+  function updateButtons(){
+    pauseBtn.disabled = false; pauseBtn.textContent = running ? 'Pause' : 'Resume';
+    resetBtn.disabled = false; fullBtn.disabled = false; uploadBtn.disabled = !currentFile;
+  }
+
+  // Drag & drop
+  ;['dragenter','dragover'].forEach(evt=>drop.addEventListener(evt, e=>{e.preventDefault();e.stopPropagation();drop.classList.add('dragover');}));
+  ;['dragleave','dragend','drop'].forEach(evt=>drop.addEventListener(evt, e=>{e.preventDefault();e.stopPropagation();drop.classList.remove('dragover');}));
+  drop.addEventListener('drop', (e)=>{ const f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f) loadROMFromFile(f); });
+
+  // Keyboard (NES defaults; SNES/GBA cores should interpret via .button handler)
+  const KEYMAP = { 13: ['start', true], 16: ['select', true], 37: ['left'], 38: ['up'], 39: ['right'], 40: ['down'], 90: ['a'], 88: ['b'] };
+  window.addEventListener('keydown', (e)=>{ const m = KEYMAP[e.keyCode]; if(m){ e.preventDefault(); setButton(m[0], true);} });
+  window.addEventListener('keyup',   (e)=>{ const m = KEYMAP[e.keyCode]; if(m){ e.preventDefault(); setButton(m[0], false);} });
+
+  // ---- Self-tests ("test cases") ----
+  (function runSelfTests(){
+    const results = [];
+    function ok(name){ results.push({name, ok:true}); }
+    function bad(name, err){ results.push({name, ok:false, err:String(err)}); }
+    try { if (uploadStatus) ok('#uploadStatus present'); else throw new Error('missing'); } catch(e){ bad('#uploadStatus present', e); }
+    try { if (window.jsnes && nes) ok('JSNES loaded'); else throw new Error('jsnes unavailable'); } catch(e){ bad('JSNES loaded', e); }
+    try {
+      ['systemSelect','romInput','uploadBtn','pauseBtn','resetBtn','fullBtn','drop'].forEach(id=>{ if(!document.getElementById(id)) throw new Error(id+' missing'); });
+      ok('Core controls exist');
+    } catch(e){ bad('Core controls exist', e); }
+    try { if (document.getElementById('systemSelect').value==='nes') ok('Default system is NES'); else throw new Error('default not NES'); } catch(e){ bad('Default system is NES', e); }
+    try { if (!window.SNESCore) ok('SNES core absent (expected until user adds one)'); else ok('SNES core detected'); } catch(e){ bad('SNES core presence check', e); }
+
+    try { if (!window.GBACore) ok('GBA core absent (expected until you load one)'); else ok('GBA core detected'); } catch(e){ bad('GBA core presence check', e); }
+
+    const ul = document.getElementById('diagList');
+    if (ul) {
+      ul.innerHTML = '';
+      for (const r of results){
+        const li = document.createElement('li');
+        li.innerHTML = (r.ok? '<span class="ok">✔</span> ' : '<span class="bad">✖</span> ') + r.name + (r.ok? '' : ' — ' + r.err);
+        ul.appendChild(li);
+      }
+    }
+    console.table(results);
+  })();
+
+  // Initial state
+  updateButtons();
+})();
+</script>
 </body>
 </html>
